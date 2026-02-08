@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Samuh Sakhi App</title>
+
+<style>
+body{
+font-family:Arial;
+margin:0;
+background:#f2f2f2;
+}
+
+/* page */
+.page{
+display:none;
+padding:10px;
+margin-bottom:90px;
+}
+.active{display:block}
+
+/* input */
+input,textarea{
+width:100%;
+padding:10px;
+margin:5px 0;
+border:2px solid #0d6efd;
+border-radius:6px;
+}
+
+/* gallery */
+.gallery img{
+width:100%;
+height:120px;
+margin:5px 0;
+border-radius:8px;
+object-fit:cover;
+}
+
+/* bottom nav */
+nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+background:#111;
+}
+
+nav button{
+flex:1;
+padding:15px;
+color:white;
+font-size:16px;
+border:2px solid orange;
+background:#222;
+}
+
+/* card */
+.card{
+background:white;
+margin:6px 0;
+padding:8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 0 5px gray;
+}
+
+/* colored text */
+.homeText{
+color:#0d6efd;
+border:3px solid orange;
+padding:10px;
+font-weight:bold;
+}
+
+.aboutText{
+color:green;
+border:3px solid red;
+padding:10px;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div id="home" class="page active">
+
+<div class="gallery">
+<img src="https://picsum.photos/400/200?1">
+<img src="https://picsum.photos/400/200?2">
+<img src="https://picsum.photos/400/200?3">
+</div>
+
+<div class="homeText">
+1. समूह सखी ऐप सभी सदस्यों का रिकॉर्ड रखता है<br>
+2. फोटो और आधार सुरक्षित सेव होता है<br>
+3. एडिट और डिलीट आसानी से करें<br>
+4. गांव की महिलाओं के लिए उपयोगी ऐप<br>
+5. डिजिटल भारत की ओर एक मजबूत कदम
+</div>
+
+</div>
+
+
+<!-- ADD MEMBER -->
+<div id="add" class="page">
+
+<input id="shg" placeholder="SHG Name">
+<input id="gram" placeholder="Gram Sangathan">
+<input id="name" placeholder="Name">
+<input id="husband" placeholder="Husband Name">
+<input id="aadhaar" placeholder="Aadhaar Number">
+<input id="bank" placeholder="Bank Account Number">
+<input id="mobile" placeholder="Mobile Number">
+<textarea id="address" placeholder="Address"></textarea>
+
+<input type="file" id="photo" accept="image/*">
+
+<button onclick="saveMember()">Save Member</button>
+
+</div>
+
+
+<!-- SHG PAGE -->
+<div id="shgPage" class="page">
+
+<h3>Member List</h3>
+
+<div id="msg"></div>
+
+<div id="list"></div>
+
+</div>
+
+
+<!-- VIEW -->
+<div id="view" class="page">
+
+<div id="details"></div>
+
+<button onclick="show('shgPage')">⬅ Back</button>
+
+</div>
+
+
+<!-- ABOUT -->
+<div id="about" class="page">
+
+<div class="gallery">
+<img src="https://picsum.photos/400/200?4">
+<img src="https://picsum.photos/400/200?5">
+<img src="https://picsum.photos/400/200?6">
+</div>
+
+<div class="aboutText">
+DEEPAK GAUD<br><br>
+1. यह ऐप गांव की प्रगति के लिए बनाया गया है<br>
+2. महिलाओं को आत्मनिर्भर बनाता है<br>
+3. डिजिटल रिकॉर्ड सुरक्षित रखता है<br>
+4. फोटो सपोर्ट उपलब्ध है<br>
+5. एडिट और डिलीट आसान है<br>
+6. ऑफलाइन काम करता है<br>
+7. सरल इंटरफेस है<br>
+8. समय की बचत करता है<br>
+9. तकनीक से गांव को मजबूत बनाता है<br>
+10. समूह सखी आपका सच्चा साथी
+</div>
+
+</div>
+
+
+<!-- NAV -->
+<nav>
+<button onclick="show('home')">Home</button>
+<button onclick="show('add')">Add</button>
+<button onclick="show('shgPage');render()">SHG</button>
+<button onclick="show('about')">About</button>
+</nav>
+
+
+
+<script>
+
+let members = JSON.parse(localStorage.getItem("members")||"[]")
+let editIndex=-1
+
+
+function show(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"))
+document.getElementById(id).classList.add("active")
+}
+
+
+/* SAVE */
+function saveMember(){
+
+let obj={
+shg:document.getElementById("shg").value,
+gram:document.getElementById("gram").value,
+name:document.getElementById("name").value,
+husband:document.getElementById("husband").value,
+aadhaar:document.getElementById("aadhaar").value,
+bank:document.getElementById("bank").value,
+mobile:document.getElementById("mobile").value,
+address:document.getElementById("address").value,
+photo:""
+}
+
+let file=document.getElementById("photo").files[0]
+
+if(file){
+let r=new FileReader()
+r.onload=()=>{obj.photo=r.result; finalSave(obj)}
+r.readAsDataURL(file)
+}else{
+finalSave(obj)
+}
+}
+
+
+/* FINAL SAVE + MESSAGE */
+function finalSave(obj){
+
+if(editIndex>=0){
+members[editIndex]=obj
+editIndex=-1
+}else{
+members.push(obj)
+}
+
+localStorage.setItem("members",JSON.stringify(members))
+
+clearForm()
+render()
+show("shgPage")
+
+msg.innerHTML="<div style='background:green;color:white;padding:8px;border-radius:6px'>✅ Save ho gaya</div>"
+
+setTimeout(()=>{msg.innerHTML=""},3000)
+}
+
+
+/* CLEAR */
+function clearForm(){
+document.querySelectorAll("#add input,#add textarea").forEach(e=>e.value="")
+}
+
+
+/* LIST */
+function render(){
+
+list.innerHTML=""
+
+members.forEach((m,i)=>{
+
+list.innerHTML+=`
+<div class="card">
+${m.shg} - ${m.name}
+<div>
+<button onclick="view(${i})">View</button>
+<button onclick="edit(${i})">Edit</button>
+<button onclick="del(${i})">Delete</button>
+</div>
+</div>
+`
+})
+}
+
+
+/* VIEW */
+function view(i){
+
+let m=members[i]
+
+details.innerHTML=`
+<img src="${m.photo}" width="100"><br><br>
+SHG: ${m.shg}<br>
+Gram: ${m.gram}<br>
+Name: ${m.name}<br>
+Husband: ${m.husband}<br>
+Aadhaar: ${m.aadhaar}<br>
+Bank: ${m.bank}<br>
+Mobile: ${m.mobile}<br>
+Address: ${m.address}<br><br>
+<button onclick="edit(${i})">Edit</button>
+`
+
+show("view")
+}
+
+
+/* EDIT */
+function edit(i){
+
+let m=members[i]
+
+shg.value=m.shg
+gram.value=m.gram
+name.value=m.name
+husband.value=m.husband
+aadhaar.value=m.aadhaar
+bank.value=m.bank
+mobile.value=m.mobile
+address.value=m.address
+
+editIndex=i
+
+show("add")
+}
+
+
+/* DELETE */
+function del(i){
+members.splice(i,1)
+localStorage.setItem("members",JSON.stringify(members))
+render()
+}
+
+render()
+
+</script>
+
+</body>
+</html>
